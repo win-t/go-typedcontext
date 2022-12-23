@@ -25,3 +25,12 @@ func TestIsolatedFromExplicitTypeReflection(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestPanicIfNoValue(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.FailNow()
+		}
+	}()
+	MustGet[int](context.Background())
+}
