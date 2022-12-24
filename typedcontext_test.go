@@ -34,3 +34,33 @@ func TestPanicIfNoValue(t *testing.T) {
 	}()
 	MustGet[int](context.Background())
 }
+
+type x interface {
+	a()
+}
+
+type y struct{ v int }
+
+func (y) a() {}
+
+type z struct{ f func() }
+
+func (z z) a() { z.f() }
+
+func TestShouldWorkOnInterface(t *testing.T) {
+	var a x = y{10}
+	ctx := context.Background()
+	ctx = New(ctx, a)
+	b := MustGet[x](ctx)
+	if b.(y).v != 10 {
+		t.FailNow()
+	}
+
+	r := ""
+	a = z{func() { r = "hello" }}
+	ctx = New(ctx, a)
+	MustGet[x](ctx).a()
+	if r != "hello" {
+		t.FailNow()
+	}
+}
